@@ -133,7 +133,6 @@ typing-extensions==3.10.0.0
 tzlocal==2.1
 ujson==4.0.2
 urllib3==1.26.3
-utils-nico @ file:///Users/nicolasesnis/code/SE_github/utils_nico
 wcwidth==0.2.5
 webdriver-manager==3.3.0
 websockets==9.1
