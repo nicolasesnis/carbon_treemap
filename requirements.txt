@@ -98,7 +98,7 @@ PyHive==0.6.4
 pymdown-extensions==6.3
 pyOpenSSL==20.0.1
 pyparsing==2.4.7
-python-binance==1.0.12
+    python-binance==1.0.12
 python-craigslist==1.1.2
 python-dateutil==2.8.1
 python-engineio==4.2.0
@@ -141,3 +141,4 @@ WTForms==2.3.3
 xlrd==2.0.1
 yarl==1.6.3
 zope.interface==5.4.0
+gunicorn
