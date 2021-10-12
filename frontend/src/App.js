@@ -10,7 +10,6 @@ function App() {
   const [getMessage, setGetMessage] = useState({})
 
   useEffect(() => {
-
     axios.get(process.env.REACT_APP_DOMAIN + '/api').then(response => {
       setGetMessage(response)
     }).catch(error => {

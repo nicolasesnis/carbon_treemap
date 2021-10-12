@@ -1,5 +1,3 @@
-from binance import ThreadedWebsocketManager
-from binance.client import Client
 from flask import Response, Flask, render_template
 import pandas as pd
 from flask_restful import Api
@@ -8,7 +6,7 @@ from flask_cors import CORS
 import json
 from flask import Flask, session
 from flask_session import Session  # new style
-# from backend_functions.pull_binance_data import get_historical_kline_df, get_exchange_info, get_wallet
+from backend_functions.plotly_funcs import build_hierarchical_dataframe
 import yaml
 
 app = Flask(__name__,
@@ -30,14 +28,22 @@ def index():
     return render_template('index.html')
 
 
-# @app.route('/get-exchange-info')
-# def get_exchange_info_():
-#     info = get_exchange_info(client)
-#     return json.dumps(info)
+@ app.route('/get-data')
+def send_data():
+    df = pd.read_csv('data/data.csv')
+    # levels used for the hierarchical chart
+    levels = ['company_name', 'industry']
+    color_columns = ['tco2_eq', 'capitalization']
+    value_column = 'capitalization'
+    df_all_trees = build_hierarchical_dataframe(
+        df, levels, value_column, color_columns)
+    output = {
+        key: list(values.values()) for key, values in df_all_trees.to_dict().items()
+    }
+    output['avg_carbon_per_capi'] = df['tco2_eq'].sum() / \
+        df['capitalization'].sum()
 
-
-# @app.route('/get-account-balance')
-# def get_current_account_balance():
+    return json.dumps(output)
 
 
 api.add_resource(HelloApiHandler, '/api')
