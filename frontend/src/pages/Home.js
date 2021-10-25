@@ -1,78 +1,190 @@
-// import { Row, Col, Container, Card, CardGroup, Breadcrumb, CardColumns } from 'react-bootstrap';
-import Plotly from 'plotly.js';
-import React, { useEffect, useState } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
+import * as React from "react";
+import { styled, useTheme } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
+import InfoIcon from "@mui/icons-material/Info";
+import CssBaseline from "@mui/material/CssBaseline";
+import MuiAppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import List from "@mui/material/List";
+import Typography from "@mui/material/Typography";
+import Divider from "@mui/material/Divider";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import ListItem from "@mui/material/ListItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import BusinessIcon from "@mui/icons-material/Business";
+import PublicIcon from "@mui/icons-material/Public";
+import Treemap from "../components/Treemap";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import TableChartIcon from "@mui/icons-material/TableChart";
+import TableRowsIcon from "@mui/icons-material/TableRows";
 
+const drawerWidth = 240;
 
-function Home() {
-    const [treeData, setTreeData] = useState(false);
-    const [treeLayout, setTreeLayout] = useState({});
-    const [loading, setLoading] = useState(true);
+const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
+  ({ theme, open }) => ({
+    flexGrow: 1,
+    padding: theme.spacing(3),
+    transition: theme.transitions.create("margin", {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    marginLeft: `-${drawerWidth}px`,
+    ...(open && {
+      transition: theme.transitions.create("margin", {
+        easing: theme.transitions.easing.easeOut,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+      marginLeft: 0,
+    }),
+  })
+);
 
-    useEffect(() => {
-        setLoading(true)
-        setTreeData(false)
-        fetch(process.env.REACT_APP_DOMAIN + '/get-data')
-            .then(response => response.json())
-            .then(resData => {
-                console.log(resData.avg_carbon_per_capi)
-                setTreeData(
-                    {
-                        type: "treemap",
-                        labels: resData.label,
-                        parents:resData.parent,
-                        values: resData.value,
-                        branchvalues:'total',
-                        marker:{
-                            colors:resData.color,
-                            // colorscale:'RdBu',
-                            colorscale:'RdYlBu',
-                            cmid:resData.avg_carbon_per_capi
-                        },
-                        hovertemplate:'<b>%{label} </b> <br> Capitalization: %{value}<br> Carbon / Capitalization: %{color:.2f}'
-                    }
-                )
-                setTreeLayout(
-                    {margin: {t:50, l:25, r:25, b:25},
-                    title: 'carbon treemap',
-                    autosize: true,
-                    font: {
-                        size: 14,
-                        plot_bgcolor: 'black'
-                    }}
-                )
-                setLoading(false)
-            })
-    }, [])
+const AppBar = styled(MuiAppBar, {
+  shouldForwardProp: (prop) => prop !== "open",
+})(({ theme, open }) => ({
+  backgroundColor: "White",
+  color: "black",
+  transition: theme.transitions.create(["margin", "width"], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  ...(open && {
+    width: `calc(100% - ${drawerWidth}px)`,
+    marginLeft: `${drawerWidth}px`,
+    transition: theme.transitions.create(["margin", "width"], {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  }),
+}));
 
-    useEffect(() => {
-        if (!loading){ 
-            Plotly.react('treemap', [treeData], treeLayout) 
-        }
-    }, [treeData, treeLayout, loading])
+const DrawerHeader = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  padding: theme.spacing(0, 1),
+  // necessary for content to be below app bar
+  ...theme.mixins.toolbar,
+  justifyContent: "flex-end",
+}));
 
-    return (
-        <div >
-            <Grid container >
-            <Grid item xs={2} style={{backgroundColor: 'darkGrey'}}>Sidebar
-            <br/><br/>
-            Project by Hiro & Nico
-            <br/><br/>
-            The example below visualizes a breakdown of capitalization (corresponding to sector width) and carbon emissions (corresponding to sector color) by industry and company level. 
-            {/* For example, when exploring the data you can see that although the East region is behaving poorly, the Tyler county is still above average -- however, its performance is reduced by the poor success rate of salesperson GT. */}
+export default function Home() {
+  const theme = useTheme();
+  const [open, setOpen] = React.useState(true);
 
+  const handleDrawerOpen = () => {
+    setOpen(true);
+  };
 
-            
-            </Grid>
-                <Grid item xs={10}>
-                    {(loading === true && !treeData)  ?  <div>Loading data</div>  : <div id='treemap' style={{ height: '100vh' }}/>}
-                    
-                </Grid>
-            </Grid >
-        </div >
-    )
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
+
+  const [tabValue, setTabValue] = React.useState(0);
+
+  const handleChangeTab = (event, newValue) => {
+    setTabValue(newValue);
+  };
+  const [filename, setFilename] = React.useState("entreprises");
+
+  return (
+    <Box sx={{ display: "flex" }}>
+      <CssBaseline />
+      <AppBar position="fixed" open={open}>
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            onClick={handleDrawerOpen}
+            edge="start"
+            sx={{ mr: 2, ...(open && { display: "none" }) }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" noWrap component="div">
+            Représentation graphique des émissions de GES
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Drawer
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          "& .MuiDrawer-paper": {
+            width: drawerWidth,
+            boxSizing: "border-box",
+          },
+        }}
+        variant="persistent"
+        anchor="left"
+        open={open}
+      >
+        <DrawerHeader>
+          <IconButton onClick={handleDrawerClose}>
+            {theme.direction === "ltr" ? (
+              <ChevronLeftIcon />
+            ) : (
+              <ChevronRightIcon />
+            )}
+          </IconButton>
+        </DrawerHeader>
+        <Divider />
+        <List>
+          <ListItem
+            button
+            key={"Pays"}
+            onClick={(event) => setFilename("pays")}
+          >
+            <ListItemIcon>
+              <PublicIcon />
+            </ListItemIcon>
+            <ListItemText primary={"Pays"} />
+          </ListItem>
+
+          <ListItem
+            button
+            key={"Entreprises"}
+            onClick={(event) => setFilename("entreprises")}
+          >
+            <ListItemIcon>
+              <BusinessIcon />
+            </ListItemIcon>
+            <ListItemText primary={"Entreprises"} />
+          </ListItem>
+        </List>
+
+        <Divider />
+
+        <List>
+          <ListItem button key={"About"}>
+            <ListItemIcon>
+              <InfoIcon />
+            </ListItemIcon>
+            <ListItemText primary={"About"} />
+          </ListItem>
+        </List>
+      </Drawer>
+      <Main open={open}>
+        <DrawerHeader />
+        <Tabs
+          value={tabValue}
+          onChange={handleChangeTab}
+          aria-label="icon tabs example"
+        >
+          <Tab icon={<TableChartIcon />} aria-label="chart" />
+          <Tab icon={<TableRowsIcon />} aria-label="table" />
+        </Tabs>
+        {tabValue === 0 ? (
+          <Treemap filename={filename} drawerOpen={open} />
+        ) : (
+          <div />
+        )}
+      </Main>
+    </Box>
+  );
 }
-
-export default Home;

@@ -28,22 +28,24 @@ def index():
     return render_template('index.html')
 
 
-@ app.route('/get-data')
-def send_data():
-    df = pd.read_csv('data/data.csv')
-    # levels used for the hierarchical chart
-    levels = ['company_name', 'industry']
-    color_columns = ['tco2_eq', 'capitalization']
-    value_column = 'capitalization'
-    df_all_trees = build_hierarchical_dataframe(
-        df, levels, value_column, color_columns)
-    output = {
-        key: list(values.values()) for key, values in df_all_trees.to_dict().items()
-    }
-    output['avg_carbon_per_capi'] = df['tco2_eq'].sum() / \
-        df['capitalization'].sum()
+@ app.route('/get-data/<filename>')
+def send_data(filename):
+    df = pd.read_csv('data/' + filename + '.csv')
+    if filename == 'entreprises':
+        # levels used for the hierarchical chart
+        levels = ['company_name', 'industry']
+        color_columns = ['tco2_eq', 'capitalization']
+        value_column = 'capitalization'
+        df_all_trees = build_hierarchical_dataframe(
+            df, levels, value_column, color_columns)
+        output = {
+            key: list(values.values()) for key, values in df_all_trees.to_dict().items()
+        }
+        output['avg_carbon_per_capi'] = df['tco2_eq'].median()
 
-    return json.dumps(output)
+        return json.dumps(output)
+    else:
+        return {}
 
 
 api.add_resource(HelloApiHandler, '/api')
