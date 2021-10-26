@@ -1,15 +1,16 @@
 // import { Row, Col, Container, Card, CardGroup, Breadcrumb, CardColumns } from 'react-bootstrap';
 import Plotly from "plotly.js";
+import Slider from "@mui/material/Slider";
 import React, { useEffect, useState } from "react";
-
-function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
+import Grid from "@mui/material/Grid";
 
 function Treemap(props) {
+  const [data, setData] = useState(false);
   const [treeData, setTreeData] = useState(false);
   const [treeLayout, setTreeLayout] = useState({});
   const [loading, setLoading] = useState(true);
+  const [year, setYear] = useState(false);
+  const [years, setYears] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -18,25 +19,20 @@ function Treemap(props) {
     fetch(process.env.REACT_APP_DOMAIN + "/get-data/" + props.filename)
       .then((response) => response.json())
       .then((resData) => {
-        setTreeData({
-          type: "treemap",
-          labels: resData.label,
-          parents: resData.parent,
-          values: resData.value,
-          branchvalues: "total",
-          marker: {
-            colors: resData.color,
-            colorscale: "Jet",
-            cmid: resData.avg_carbon_per_capi,
-          },
-          hovertemplate:
-            "<b>%{label} </b> <br> Capitalization: %{value}<br> Carbon : %{color:,}<extra></extra>",
-          //   maxdepth: 2,
-        });
+        setYear(Object.keys(resData)[Object.keys(resData).length - 1]);
+        setYears(
+          Object.keys(resData).map((year) => ({
+            label: year,
+            value: parseInt(year),
+          }))
+        );
+        setData(resData);
         setTreeLayout({
           margin: { t: 50, l: 25, r: 25, b: 25 },
           title:
-            "GES et market cap. - " + capitalizeFirstLetter(props.filename),
+            props.filename === "entreprises"
+              ? "GES et market cap. - Entreprises"
+              : "GES par habitant et GES total - Pays",
           autosize: true,
           font: {
             size: 14,
@@ -45,7 +41,10 @@ function Treemap(props) {
           annotations: [
             {
               showarrow: false,
-              text: "<i>Taille des zones : market cap. ; Couleur des zones : GES</i>",
+              text:
+                props.filename === "entreprises"
+                  ? "<i>Taille des zones : market cap. ; Couleur des zones : GES</i>"
+                  : "<i>Taille des zones : GES total ; Couleur des zones : GES par habitant</i>",
               x: 0.5,
               xanchor: "center",
               y: -0.05,
@@ -58,10 +57,60 @@ function Treemap(props) {
   }, [props.filename]);
 
   useEffect(() => {
-    if (!loading && treeData) {
-      Plotly.react("treemap", [treeData], treeLayout, { responsive: true });
+    if (year && data && years) {
+      if (
+        years
+          .map(function (a) {
+            return a.value;
+          })
+          .includes(parseInt(year))
+      ) {
+        setTreeData(data[year]);
+      }
     }
-  }, [treeData, treeLayout, loading]);
+  }, [year, data, years]);
+
+  useEffect(() => {
+    if (!loading && treeData) {
+      console.log(treeData.tco2_eq_mean);
+      Plotly.react(
+        "treemap",
+        [
+          {
+            type: "treemap",
+            labels: treeData.label,
+            parents: treeData.parent,
+            values: treeData.value,
+            branchvalues: "total",
+            marker: {
+              colors: treeData.color,
+              colorscale: [
+                ["0.0", "#00FF00"],
+                ["0.111111111111", "#35FF00"],
+                ["0.222222222222", "#6AFF00"],
+                ["0.333333333333", "#9FFF00"],
+                ["0.444444444444", "#D4FF00"],
+                ["0.555555555556", "#FFF600"],
+                ["0.666666666667", "#FFC100"],
+                ["0.777777777778", "#FF8C00"],
+                ["0.888888888889", "#FF5700"],
+                ["1.0", "#FF1100"],
+              ],
+              cmid: treeData.tco2_eq_mean,
+            },
+            hovertemplate:
+              props.filename === "entreprises"
+                ? "<b>%{label} </b> <br> Market cap. : %{value}<br> GES : %{color:,}<extra></extra>"
+                : "<b>%{label} </b> <br> GES Total : %{value}<br> GES par habitant : %{color:,}<extra></extra>",
+
+            //   maxdepth: 2,
+          },
+        ],
+        treeLayout,
+        { responsive: true }
+      );
+    }
+  }, [treeData, treeLayout, loading, props.filename]);
 
   useEffect(() => {
     setTimeout(function () {
@@ -69,14 +118,47 @@ function Treemap(props) {
     }, 100);
   }, [props.drawerOpen]);
 
+  const handleSliderChange = (event) => {
+    setYear(event.target.value);
+  };
+
   return (
     <div>
-      {loading === true && !treeData ? (
+      {loading === true || !treeData || !years || !year ? (
         <div> Loading data </div>
       ) : (
-        <div>
-          <div id="treemap" style={{ height: "80vh" }} />{" "}
-        </div>
+        <Grid container spacing="1" alignItems="center">
+          <Grid item xs={1}>
+            <Slider
+              style={{ height: "50vh" }}
+              getAriaLabel={() => "Year"}
+              orientation="vertical"
+              defaultValue={[
+                Math.max(
+                  ...years.map(function (a) {
+                    return a.value;
+                  })
+                ),
+              ]}
+              step={1}
+              onChange={(event) => handleSliderChange(event)}
+              marks={years}
+              max={Math.max(
+                ...years.map(function (a) {
+                  return a.value;
+                })
+              )}
+              min={Math.min(
+                ...years.map(function (a) {
+                  return a.value;
+                })
+              )}
+            />
+          </Grid>
+          <Grid item xs={11}>
+            <div id="treemap" style={{ height: "80vh" }} />{" "}
+          </Grid>
+        </Grid>
       )}
     </div>
   );

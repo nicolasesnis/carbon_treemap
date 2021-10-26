@@ -1,0 +1,73 @@
+region,country,tco2_eq,tco2_eq_per_hab,year
+Amerique du Nord,Canada,455,16.4,1990
+Amerique du Nord,USA,5064,20.3,1990
+Amerique du Nord,Autre,290,1.5,1990
+Amerique centrale et Sud,Bresil,229,,1990
+Amerique centrale et Sud,Autre,446,,1990
+Europe & ex-URSS,Russie,2355,15.9,1990
+Europe & ex-URSS,Allemagne,1018,12.8,1990
+Europe & ex-URSS,Espagne,234,6,1990
+Europe & ex-URSS,France,390,6.7,1990
+Europe & ex-URSS,Italie,431,7.6,1990
+Europe & ex-URSS,Pologne,371,9.7,1990
+Europe & ex-URSS,UK,584,10.2,1990
+Europe & ex-URSS,Autre,3074,,1990
+Afrique sub-saharienne,,478,1,1990
+Moyen-orient & Afrique du nord,Arabie Saoudite,173,10.6,1990
+Moyen-orient & Afrique du nord,Autre,883,,1990
+Asie,Chine,2398,2.1,1990
+Asie,Coree du sud,270,6.3,1990
+Asie,Inde,595,0.7,1990
+Asie,Japon,1149,9.3,1990
+Asie,Autre,810,,1990
+Oceanie,Australie,309,11.8,1990
+Soutes,Aeriennes,259,,1990
+Soutes,Maritimes,372,,1990
+Amerique du Nord,Canada,595,16.3,2017
+Amerique du Nord,USA,5128,15.8,2017
+Amerique du Nord,Autre,508,2.4,2017
+Amerique centrale et Sud,Bresil,507,,2017
+Amerique centrale et Sud,Autre,841,,2017
+Europe & ex-URSS,Russie,1688,11.7,2017
+Europe & ex-URSS,Allemagne,788,9.5,2017
+Europe & ex-URSS,Espagne,282,6.1,2017
+Europe & ex-URSS,France,339,5.1,2017
+Europe & ex-URSS,Italie,356,5.9,2017
+Europe & ex-URSS,Pologne,327,8.6,2017
+Europe & ex-URSS,UK,379,5.7,2017
+Europe & ex-URSS,Autre,2043,,2017
+Afrique sub-saharienne,,849,0.8,2017
+Moyen-orient & Afrique du nord,Arabie Saoudite,632,19.1,2017
+Moyen-orient & Afrique du nord,Autre,2529,,2017
+Asie,Chine,11087,8,2017
+Asie,Coree du sud,675,13.2,2017
+Asie,Inde,2446,1.9,2017
+Asie,Japon,1220,9.6,2017
+Asie,Autre,2254,,2017
+Oceanie,Australie,462,11.7,2017
+Soutes,Aeriennes,559,,2017
+Soutes,Maritimes,684,,2017
+Amerique du Nord,Canada,594,16,2018
+Amerique du Nord,USA,5275,16.1,2018
+Amerique du Nord,Autre,497,2.4,2018
+Amerique centrale et Sud,Bresil,500,,2018
+Amerique centrale et Sud,Autre,843,,2018
+Europe & ex-URSS,Russie,1748,12.1,2018
+Europe & ex-URSS,Allemagne,753,9.1,2018
+Europe & ex-URSS,Espagne,276,5.9,2018
+Europe & ex-URSS,France,332,5,2018
+Europe & ex-URSS,Italie,345,5.7,2018
+Europe & ex-URSS,Pologne,334,8.8,2018
+Europe & ex-URSS,UK,372,5.6,2018
+Europe & ex-URSS,Autre,2083,,2018
+Afrique sub-saharienne,,862,0.8,2018
+Moyen-orient & Afrique du nord,Arabie Saoudite,625,18.5,2018
+Moyen-orient & Afrique du nord,Autre,2604,,2018
+Asie,Chine,11256,8.1,2018
+Asie,Coree du sud,695,13.5,2018
+Asie,Inde,2622,1.9,2018
+Asie,Japon,1199,9.5,2018
+Asie,Autre,2345,,2018
+Oceanie,Australie,465,11.6,2018
+Soutes,Aeriennes,565,,2018
+Soutes,Maritimes,697,,2018

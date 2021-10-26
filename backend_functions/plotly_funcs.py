@@ -1,15 +1,13 @@
 import pandas as pd
 
 
-def build_hierarchical_dataframe(df, levels, value_column, color_columns=None):
+def build_hierarchical_dataframe(df, levels, value_column, color_columns):
     """
     Build a hierarchy of levels for Sunburst or Treemap charts.
 
     Levels are given starting from the bottom to the top of the hierarchy,
     ie the last level corresponds to the root.
     """
-    for col in color_columns:
-        df[col] = df[col].astype(float)
     df_all_trees = pd.DataFrame(columns=['label', 'parent', 'value', 'color'])
     for i, level in enumerate(levels):
         df_tree = pd.DataFrame(columns=['label', 'parent', 'value', 'color'])
@@ -17,13 +15,13 @@ def build_hierarchical_dataframe(df, levels, value_column, color_columns=None):
             dfg = df.groupby(levels[i:]).sum().reset_index()
             df_tree['label'] = dfg[level].copy()
             df_tree['parent'] = dfg[levels[i+1]].copy()
-            df_tree['color'] = dfg[color_columns[0]]
+            df_tree['color'] = dfg[color_columns]
         else:
             dfg = df.groupby(levels[i:]).agg(
-                {color_columns[0]: ['mean'], color_columns[1]: ['sum']}).reset_index()
+                {color_columns: ['mean'], value_column: ['sum']}).reset_index()
             df_tree['label'] = dfg[level].copy()
             df_tree['parent'] = 'total'
-            df_tree['color'] = dfg[color_columns[0]]
+            df_tree['color'] = dfg[color_columns]
         df_tree['value'] = dfg[value_column]
         df_tree['level'] = level
         df_all_trees = df_all_trees.append(df_tree, ignore_index=True)
