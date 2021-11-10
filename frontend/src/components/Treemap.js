@@ -1,4 +1,5 @@
 // import { Row, Col, Container, Card, CardGroup, Breadcrumb, CardColumns } from 'react-bootstrap';
+import Alert from "@mui/material/Alert";
 import Plotly from "plotly.js";
 import Slider from "@mui/material/Slider";
 import React, { useEffect, useState } from "react";
@@ -11,6 +12,7 @@ function Treemap(props) {
   const [loading, setLoading] = useState(true);
   const [year, setYear] = useState(false);
   const [years, setYears] = useState(false);
+  const [alert, setAlert] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -19,40 +21,45 @@ function Treemap(props) {
     fetch(process.env.REACT_APP_DOMAIN + "/get-data/" + props.filename)
       .then((response) => response.json())
       .then((resData) => {
-        setYear(Object.keys(resData)[Object.keys(resData).length - 1]);
-        setYears(
-          Object.keys(resData).map((year) => ({
-            label: year,
-            value: parseInt(year),
-          }))
-        );
-        setData(resData);
-        setTreeLayout({
-          margin: { t: 50, l: 25, r: 25, b: 25 },
-          title:
-            props.filename === "entreprises"
-              ? "GES et market cap. - Entreprises"
-              : "GES par habitant et GES total - Pays",
-          autosize: true,
-          font: {
-            size: 14,
-            plot_bgcolor: "black",
-          },
-          annotations: [
-            {
-              showarrow: false,
-              text:
-                props.filename === "entreprises"
-                  ? "<i>Taille des zones : market cap. ; Couleur des zones : GES</i>"
-                  : "<i>Taille des zones : GES total ; Couleur des zones : GES par habitant</i>",
-              x: 0.5,
-              xanchor: "center",
-              y: -0.05,
-              yanchor: "bottom",
+        if (resData.status === 200) {
+          setAlert(false);
+          setYear(Object.keys(resData)[Object.keys(resData).length - 2]);
+          setYears(
+            Object.keys(resData).map((year) => ({
+              label: year,
+              value: parseInt(year),
+            }))
+          );
+          setData(resData);
+          setTreeLayout({
+            margin: { t: 50, l: 25, r: 25, b: 25 },
+            title:
+              props.filename === "entreprises"
+                ? "GES et market cap. - Entreprises"
+                : "GES par habitant et GES total - Pays",
+            autosize: true,
+            font: {
+              size: 14,
+              plot_bgcolor: "black",
             },
-          ],
-        });
-        setLoading(false);
+            annotations: [
+              {
+                showarrow: false,
+                text:
+                  props.filename === "entreprises"
+                    ? "<i>Taille des zones : market cap. ; Couleur des zones : GES</i>"
+                    : "<i>Taille des zones : GES total ; Couleur des zones : GES par habitant</i>",
+                x: 0.5,
+                xanchor: "center",
+                y: -0.05,
+                yanchor: "bottom",
+              },
+            ],
+          });
+          setLoading(false);
+        } else {
+          setAlert(resData.message);
+        }
       });
   }, [props.filename]);
 
@@ -72,7 +79,6 @@ function Treemap(props) {
 
   useEffect(() => {
     if (!loading && treeData) {
-      console.log(treeData.tco2_eq_mean);
       Plotly.react(
         "treemap",
         [
@@ -116,7 +122,7 @@ function Treemap(props) {
     setTimeout(function () {
       window.dispatchEvent(new Event("resize"));
     }, 100);
-  }, [props.drawerOpen]);
+  }, [props.open]);
 
   const handleSliderChange = (event) => {
     setYear(event.target.value);
@@ -125,7 +131,23 @@ function Treemap(props) {
   return (
     <div>
       {loading === true || !treeData || !years || !year ? (
-        <div> Loading data </div>
+        <div>
+          {alert ? (
+            <Alert style={{ marginTop: "2vh" }} severity="error">
+              <div>
+                <div>
+                  Something went wrong. The file is probably not matching with
+                  compatible templates. Double check file or send below message
+                  to Nico:
+                </div>
+                <br />
+                {alert}
+              </div>
+            </Alert>
+          ) : (
+            <div> Loading data </div>
+          )}
+        </div>
       ) : (
         <Grid container spacing="1" alignItems="center">
           <Grid item xs={1}>
