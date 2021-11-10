@@ -54,7 +54,6 @@ def send_data(filename):
                 color_column: df[df['year'] == year][color_column].median(),
                 'raw_data': df[df['year'] == year].to_dict()
             })
-            output['status'] = 200
     except Exception:
         output = {
             'status': 'failed',

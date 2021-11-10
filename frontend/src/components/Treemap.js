@@ -21,9 +21,9 @@ function Treemap(props) {
     fetch(process.env.REACT_APP_DOMAIN + "/get-data/" + props.filename)
       .then((response) => response.json())
       .then((resData) => {
-        if (resData.status === 200) {
+        if (resData.status !== 'failed') {
           setAlert(false);
-          setYear(Object.keys(resData)[Object.keys(resData).length - 2]);
+          setYear(Object.keys(resData)[Object.keys(resData).length - 1]);
           setYears(
             Object.keys(resData).map((year) => ({
               label: year,
