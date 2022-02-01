@@ -4,7 +4,6 @@ import axios from "axios";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import Home from "./pages/Home";
 
-
 function App() {
   const [getMessage, setGetMessage] = useState({});
 
@@ -28,9 +27,9 @@ function App() {
       {getMessage.status === 200 ? (
         <div>
           <Router>
-            <Route exact path="/" component={Home}  ></Route>
+            <Route exact path="/" component={Home}></Route>
           </Router>
-        </div> 
+        </div>
       ) : (
         <h3>LOADING</h3>
       )}

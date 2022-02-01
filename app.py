@@ -37,23 +37,31 @@ def send_data(filename):
         if filename not in os.listdir('data'):
             download_gdrive_file(filename)
         df = pd.read_csv('data/' + filename).dropna()
-        levels = list(df.columns)[0:2]
-        color_column = df.columns[3]
-        value_column = df.columns[4]
-        df[color_column] = df[color_column].astype(float)
+        levels = ['country', 'area', 'region']
+        value_column = 'CO2'
+        df = df.melt(id_vars = levels,
+                     var_name = 'year',
+                     value_name = value_column)
+        
         output = dict()
-        for year in df['year'].unique():
-            df_all_trees = build_hierarchical_dataframe(
-                df[df['year'] == year], levels, value_column, color_column)
-            output.update({
-                str(year): {
-                    key: list(values.values()) for key, values in df_all_trees.to_dict().items()
-                }
-            })
-            output[str(year)].update({
-                color_column: df[df['year'] == year][color_column].median(),
-                'raw_data': df[df['year'] == year].to_dict()
-            })
+        years = df.year.unique()
+        for year in years:
+            for evo in [1, 5, 10, 50]:
+                if str(int(year) - evo) in years:
+                    if year not in output:
+                        output[year] = {} 
+                    df.loc[df.year == year, str(evo) + 'y_evo']= (df.loc[df.year == year, value_column].values - df.loc[df.year == str(int(year) - evo), value_column].values) / df.loc[df.year == str(int(year) - evo), value_column].values
+                    color_column = str(evo) + 'y_evo'
+                    df_all_trees = build_hierarchical_dataframe( 
+                        df[df.year == year], levels, value_column, color_column).fillna(0)
+                    output[year][str(evo) + 'y_evo'] ={key: list(values.values()) for key, values in df_all_trees.to_dict().items()}
+                    output[year][str(evo) + 'y_evo'].update({
+                        color_column + '_med': df[df['year'] == year][color_column].median(),
+                        color_column + '_min': df[df['year'] == year][color_column].quantile(0.1),
+                        color_column + '_max': df[df['year'] == year][color_column].quantile(0.9),
+                        # 'raw_data': df[df['year'] == year].to_dict()
+                    })
+                    
     except Exception:
         output = {
             'status': 'failed',
@@ -71,3 +79,7 @@ def list_files():
 
 
 api.add_resource(HelloApiHandler, '/api')
+    
+
+if __name__ == "__main__":
+    app.run(debug=True, port=8000)

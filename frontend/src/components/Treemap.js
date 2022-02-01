@@ -1,9 +1,13 @@
 // import { Row, Col, Container, Card, CardGroup, Breadcrumb, CardColumns } from 'react-bootstrap';
 import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import InputLabel from "@mui/material/InputLabel";
+import FormControl from "@mui/material/FormControl";
 import Plotly from "plotly.js";
-import Slider from "@mui/material/Slider";
+import Select from "@mui/material/Select";
 import React, { useEffect, useState } from "react";
 import Grid from "@mui/material/Grid";
+import MenuItem from "@mui/material/MenuItem";
 
 function Treemap(props) {
   const [data, setData] = useState(false);
@@ -13,6 +17,8 @@ function Treemap(props) {
   const [year, setYear] = useState(false);
   const [years, setYears] = useState(false);
   const [alert, setAlert] = useState(false);
+  const [colorValues, setColorValues] = useState(false);
+  const [colorValue, setColorValue] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -21,7 +27,7 @@ function Treemap(props) {
     fetch(process.env.REACT_APP_DOMAIN + "/get-data/" + props.filename)
       .then((response) => response.json())
       .then((resData) => {
-        if (resData.status !== 'failed') {
+        if (resData.status !== "failed") {
           setAlert(false);
           setYear(Object.keys(resData)[Object.keys(resData).length - 1]);
           setYears(
@@ -31,12 +37,13 @@ function Treemap(props) {
             }))
           );
           setData(resData);
+          setColorValue("1y_evo");
           setTreeLayout({
             margin: { t: 50, l: 25, r: 25, b: 25 },
             title:
               props.filename === "entreprises"
                 ? "GES et market cap. - Entreprises"
-                : "GES par habitant et GES total - Pays",
+                : "CO2 total et evolution - Pays",
             autosize: true,
             font: {
               size: 14,
@@ -47,8 +54,8 @@ function Treemap(props) {
                 showarrow: false,
                 text:
                   props.filename === "entreprises"
-                    ? "<i>Taille des zones : market cap. ; Couleur des zones : GES</i>"
-                    : "<i>Taille des zones : GES total ; Couleur des zones : GES par habitant</i>",
+                    ? "<i>Taille des zones : market cap. ; Couleur des zones : CO2</i>"
+                    : "<i>Taille des zones : GES total ; Couleur des zones : Evolution</i>",
                 x: 0.5,
                 xanchor: "center",
                 y: -0.05,
@@ -64,20 +71,23 @@ function Treemap(props) {
   }, [props.filename]);
 
   useEffect(() => {
-    if (year && data && years) {
-      if (
-        years
-          .map(function (a) {
-            return a.value;
-          })
-          .includes(parseInt(year))
-      ) {
-        setTreeData(data[year]);
-      }
+    if (year && data && colorValue) {
+      setTreeData(data[year][colorValue]);
+      setColorValues(
+        Object.keys(data[year]).map((color) => ({
+          label: color,
+          value: color,
+        }))
+      );
     }
-  }, [year, data, years]);
+  }, [year, data, colorValue]);
 
   useEffect(() => {
+    setColorValue("1y_evo");
+  }, [year]);
+
+  useEffect(() => {
+    console.log(treeData);
     if (!loading && treeData) {
       Plotly.react(
         "treemap",
@@ -91,23 +101,26 @@ function Treemap(props) {
             marker: {
               colors: treeData.color,
               colorscale: [
-                ["0.0", "#00FF00"],
-                ["0.111111111111", "#35FF00"],
-                ["0.222222222222", "#6AFF00"],
-                ["0.333333333333", "#9FFF00"],
-                ["0.444444444444", "#D4FF00"],
-                ["0.555555555556", "#FFF600"],
-                ["0.666666666667", "#FFC100"],
-                ["0.777777777778", "#FF8C00"],
-                ["0.888888888889", "#FF5700"],
-                ["1.0", "#FF1100"],
+                ["0.0", "#2ca853"],
+                ["0.111111111111", "#56a33b"],
+                ["0.222222222222", "#729c23"],
+                ["0.333333333333", "#8a940a"],
+                ["0.444444444444", "#9f8b00"],
+                ["0.555555555556", "#b28100"],
+                ["0.666666666667", "#c37511"],
+                ["0.777777777778", "#d16826"],
+                ["0.888888888889", "#db5b3a"],
+                ["1.0", "#e24e4e"],
               ],
-              cmid: treeData.tco2_eq_mean,
+              showscale: true,
+              cmid: treeData[colorValue + "_med"],
+              cmax: treeData[colorValue + "_max"],
+              cmin: treeData[colorValue + "_min"],
             },
             hovertemplate:
               props.filename === "entreprises"
                 ? "<b>%{label} </b> <br> Market cap. : %{value}<br> GES : %{color:,}<extra></extra>"
-                : "<b>%{label} </b> <br> GES Total : %{value}<br> GES par habitant : %{color:,}<extra></extra>",
+                : "<b>%{label} </b> <br> C02 Total : %{value}<br> Evolution : %{color:,}<extra></extra>",
 
             //   maxdepth: 2,
           },
@@ -116,17 +129,13 @@ function Treemap(props) {
         { responsive: true }
       );
     }
-  }, [treeData, treeLayout, loading, props.filename]);
+  }, [treeData, treeLayout, loading, props.filename, colorValue]);
 
   useEffect(() => {
     setTimeout(function () {
       window.dispatchEvent(new Event("resize"));
     }, 100);
   }, [props.open]);
-
-  const handleSliderChange = (event) => {
-    setYear(event.target.value);
-  };
 
   return (
     <div>
@@ -151,32 +160,47 @@ function Treemap(props) {
       ) : (
         <Grid container spacing="1" alignItems="center">
           <Grid item xs={1}>
-            <Slider
-              style={{ height: "50vh" }}
-              getAriaLabel={() => "Year"}
-              orientation="vertical"
-              defaultValue={[
-                Math.max(
-                  ...years.map(function (a) {
-                    return a.value;
-                  })
-                ),
-              ]}
-              step={1}
-              onChange={(event) => handleSliderChange(event)}
-              marks={years}
-              max={Math.max(
-                ...years.map(function (a) {
-                  return a.value;
-                })
-              )}
-              min={Math.min(
-                ...years.map(function (a) {
-                  return a.value;
-                })
-              )}
-            />
+            {" "}
+            <Box>
+              <FormControl fullWidth>
+                <InputLabel id="demo-simple-select-label">Year</InputLabel>
+                <Select
+                  id="select-year"
+                  value={year}
+                  label="Year"
+                  onChange={(event) => setYear(event.target.value)}
+                >
+                  {Object.keys(years).map(function (y) {
+                    return (
+                      <MenuItem value={years[y].value} key={y}>
+                        {years[y].label}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>{" "}
+              </FormControl>
+            </Box>{" "}
+            <Box sx={{ marginTop: "5vh" }}>
+              <FormControl fullWidth>
+                <InputLabel id="demo-simple-select-label">Color</InputLabel>
+                <Select
+                  id="select-color"
+                  value={colorValue}
+                  label="Color"
+                  onChange={(event) => setColorValue(event.target.value)}
+                >
+                  {Object.keys(colorValues).map(function (c) {
+                    return (
+                      <MenuItem value={colorValues[c].value} key={c}>
+                        {colorValues[c].label}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>{" "}
+              </FormControl>
+            </Box>
           </Grid>
+
           <Grid item xs={11}>
             <div id="treemap" style={{ height: "80vh" }} />{" "}
           </Grid>
