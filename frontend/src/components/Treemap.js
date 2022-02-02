@@ -46,9 +46,10 @@ function Treemap(props) {
                 : "CO2 total et evolution - Pays",
             autosize: true,
             font: {
-              size: 14,
+              size: "50%",
               plot_bgcolor: "black",
             },
+            textfont: 30,
             annotations: [
               {
                 showarrow: false,
@@ -98,6 +99,7 @@ function Treemap(props) {
             parents: treeData.parent,
             values: treeData.value,
             branchvalues: "total",
+
             marker: {
               colors: treeData.color,
               colorscale: [
@@ -117,6 +119,9 @@ function Treemap(props) {
               cmax: treeData[colorValue + "_max"],
               cmin: treeData[colorValue + "_min"],
             },
+            textposition: "center",
+            texttemplate:
+              "<span style='font-size:4vw; text-align: center'>%{label}<span>",
             hovertemplate:
               props.filename === "entreprises"
                 ? "<b>%{label} </b> <br> Market cap. : %{value}<br> GES : %{color:,}<extra></extra>"
